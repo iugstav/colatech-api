@@ -28,22 +28,29 @@ func SetupRoutes(r *gin.RouterGroup, db *sqlx.DB) {
 
 	// Posts routes
 	postRG := r.Group("/posts")
+
 	postRG.POST("/create",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
 		postHandler.CreatePostController())
+
 	postRG.GET("/get/all",
 		middleware.IsAuthenticatedMiddleware(),
 		postHandler.GetAllPostsController())
+
 	postRG.GET("/get/all/minified", postHandler.GetAllMinifiedPostsController())
+
 	postRG.GET("/get/:id", postHandler.GetPostByIdController())
+
 	postRG.PATCH("/update/content",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
 		postHandler.UpdatePostContentController())
+
 	postRG.PATCH("/upload/image",
 		middleware.IsAuthorMiddleware(),
 		postHandler.UploadImageController())
+
 	postRG.DELETE("/delete/:id",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
@@ -51,13 +58,17 @@ func SetupRoutes(r *gin.RouterGroup, db *sqlx.DB) {
 
 	// Commenta routes
 	commentRG := r.Group("/comments")
+
 	commentRG.POST("/create",
 		middleware.IsAuthenticatedMiddleware(),
 		commentHandler.CreateCommentController())
+
 	commentRG.GET("/all/from/:pid", commentHandler.GetAllCommetsFromAPostController())
+
 	commentRG.PATCH("/update/content",
 		middleware.IsAuthenticatedMiddleware(),
 		commentHandler.UpdateCommentContentController())
+
 	commentRG.DELETE("delete/:id",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
@@ -65,15 +76,19 @@ func SetupRoutes(r *gin.RouterGroup, db *sqlx.DB) {
 
 	// Categories routes
 	categoryRG := r.Group("/categories")
+
 	categoryRG.POST("/create",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
 		categoryHandler.CreateCategoryController())
+
 	categoryRG.GET("/all", categoryHandler.GetAllCategoriesController())
+
 	categoryRG.PATCH("/update",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
 		categoryHandler.UpdateCategoryNameController())
+
 	categoryRG.DELETE("/delete/:id",
 		middleware.IsAuthenticatedMiddleware(),
 		middleware.IsAuthorMiddleware(),
@@ -81,10 +96,14 @@ func SetupRoutes(r *gin.RouterGroup, db *sqlx.DB) {
 
 	// account routes
 	userRG := r.Group("/users")
+
 	userRG.GET("/get/:id",
 		middleware.IsAuthenticatedMiddleware(),
 		userHandler.GetUserByIdController())
+
 	userRG.PATCH("/upload/image")
+
 	userRG.POST("/create", userHandler.CreateUserController())
+
 	userRG.POST("/login", userHandler.AuthenticateUserController())
 }
