@@ -74,8 +74,6 @@ func (r *PostsRepository) GetById(id string) (*PostFromPersistence, error) {
 	var post PostFromPersistence
 	var postComments []comment.Comment
 
-	// TODO: analisar melhor query a ser utilizada pro fetch de posts. acho que a de comentários tá boa
-
 	postsQuery := `SELECT p.id, p.title, p.slug, p.content, p.category_id, p.published_at, p.cover_image_url, c.name AS category_name 
 			FROM posts p 
 			LEFT JOIN categories c ON p.category_id=c.id 
