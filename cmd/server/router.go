@@ -34,6 +34,9 @@ func SetupRoutes(r *gin.RouterGroup, db *sqlx.DB) {
 		middleware.IsAuthorMiddleware(),
 		postHandler.CreatePostController())
 
+	postRG.POST("/like",
+		middleware.IsAuthenticatedMiddleware(), postHandler.LikePostController())
+
 	postRG.GET("/get/all",
 		middleware.IsAuthenticatedMiddleware(),
 		postHandler.GetAllPostsController())

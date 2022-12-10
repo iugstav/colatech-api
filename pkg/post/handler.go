@@ -214,10 +214,38 @@ func (h *PostHandler) UpdatePostContentController() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+
+			return
 		}
 
 		c.JSON(http.StatusNoContent, gin.H{
 			"message": "Successfully updated content",
+		})
+	}
+}
+
+func (h *PostHandler) LikePostController() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request LikePostDTO
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		if err := h.PostService.LikePost(&request); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusNoContent, gin.H{
+			"message": "Successfully liked post",
 		})
 	}
 }
