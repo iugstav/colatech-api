@@ -21,6 +21,7 @@ type IPostService interface {
 	GetById(id string) (*GetPostByIdServiceResponse, error)
 	UpdateContent(data *UpdatePostContentDTO) error
 	UploadImage(data *UploadPostCoverImageRequest) error
+	LikePost(dto *LikePostDTO) error
 	Delete(id string) error
 }
 
@@ -161,6 +162,48 @@ func (s *PostService) UpdateContent(data *UpdatePostContentDTO) error {
 	repositoryErr := s.PostsRepository.UpdateContent(data)
 	if repositoryErr != nil {
 		return repositoryErr
+	}
+
+	return nil
+}
+
+func (s *PostService) LikePost(dto *LikePostDTO) error {
+	_, err := uuid.Parse(dto.UserID)
+	if err != nil {
+		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
+
+		return errors.New(errMessage)
+	}
+	_, err = uuid.Parse(dto.PostID)
+	if err != nil {
+		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
+
+		return errors.New(errMessage)
+	}
+
+	postExists, userExists := s.PostsRepository.BothUserAndPostExists(dto.UserID, dto.UserID)
+
+	if !postExists && userExists {
+		errorMsg := errors.New("this id does not refers to any post")
+
+		return errorMsg
+	} else if postExists && !userExists {
+		errorMsg := errors.New("this id does not refer to any user")
+
+		return errorMsg
+	}
+
+	likeID := uuid.NewString()
+
+	data := &LikePostInPersistence{
+		ID:     likeID,
+		UserID: dto.UserID,
+		PostID: dto.PostID,
+	}
+
+	err = s.PostsRepository.LikePost(data)
+	if err != nil {
+		return err
 	}
 
 	return nil

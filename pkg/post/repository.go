@@ -1,6 +1,9 @@
 package post
 
 import (
+	"database/sql"
+	"log"
+
 	"github.com/iugstav/colatech-api/pkg/comment"
 	"github.com/jmoiron/sqlx"
 )
@@ -9,10 +12,13 @@ type IPostsRepository interface {
 	Create(post *Post) error
 	GetAll() ([]*Post, error)
 	GetAllMinified() ([]*ResumedPost, error)
-	GetById(id string) (*PostFromPersistence, error)
+	GetById(id string) (*GetPostByIdPersistence, error)
 	UpdateContent(dto *UpdatePostContentDTO) error
 	UploadImage(dto *UploadPostCoverImageInPersistence) error
+	LikePost(data *LikePostInPersistence) error
 	Delete(id string) error
+	Exists(id string) bool
+	BothUserAndPostExists(userId string, postId string) (bool, bool)
 }
 
 type PostsRepository struct {
@@ -70,7 +76,7 @@ func (r *PostsRepository) GetAllMinified() ([]*ResumedPost, error) {
 	return posts, nil
 }
 
-func (r *PostsRepository) GetById(id string) (*PostFromPersistence, error) {
+func (r *PostsRepository) GetById(id string) (*GetPostByIdPersistence, error) {
 	var post PostFromPersistence
 	var postComments []comment.Comment
 
@@ -95,11 +101,27 @@ func (r *PostsRepository) GetById(id string) (*PostFromPersistence, error) {
 		return nil, err
 	}
 
-	return &post, nil
+	response := &GetPostByIdPersistence{
+		post,
+		postComments,
+	}
+
+	return response, nil
 }
 
 func (r *PostsRepository) UpdateContent(dto *UpdatePostContentDTO) error {
 	_, err := r.DB.Exec(`UPDATE posts SET content=$1 WHERE id=$2`, dto.NewContent, dto.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *PostsRepository) LikePost(data *LikePostInPersistence) error {
+	query := `INSERT INTO likes(id, user_id, post_id) VALUES(:id, :user_id, :post_id)`
+
+	_, err := r.DB.NamedExec(query, &data)
 	if err != nil {
 		return err
 	}
@@ -114,4 +136,53 @@ func (r *PostsRepository) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (r *PostsRepository) Exists(id string) bool {
+	var exists bool
+
+	query := `SELECT EXISTS (SELECT id FROM posts where id=$1)`
+
+	err := r.DB.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatalf("Error while checking existence of post: %v", err.Error())
+		}
+	}
+
+	return true
+}
+
+func (r *PostsRepository) BothUserAndPostExists(userId string, postId string) (bool, bool) {
+	var userExists bool
+	var postExists bool
+
+	userQuery := `SELECT EXISTS (SELECT id FROM readers where id=$1)`
+	postQuery := `SELECT EXISTS (SELECT id FROM posts where id=$1)`
+
+	err := r.DB.QueryRow(userQuery, userId).Scan(&userExists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			userExists = false
+		} else {
+			log.Fatalf("Error while checking existence of user: %v", err.Error())
+		}
+	} else {
+		userExists = true
+	}
+
+	err = r.DB.QueryRow(postQuery, postId).Scan(&postExists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			postExists = false
+		} else {
+			log.Fatalf("Error while checking existence of post: %v", err.Error())
+		}
+	} else {
+		postExists = true
+	}
+
+	return postExists, userExists
 }

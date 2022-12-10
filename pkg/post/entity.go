@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/iugstav/colatech-api/pkg/category"
+	"github.com/iugstav/colatech-api/pkg/comment"
 )
 
 type Post struct {
@@ -37,6 +38,11 @@ type PostFromPersistence struct {
 	CategoryID    string    `json:"category_id" db:"category_id"`
 	CategoryName  string    `json:"category_name" db:"category_name"`
 	PublishedAt   time.Time `json:"published_at" db:"published_at"`
+}
+
+type GetPostByIdPersistence struct {
+	PostFromPersistence
+	Comments []comment.Comment
 }
 
 type GetPostByIdServiceResponse struct {
@@ -88,4 +94,14 @@ type UploadPostCoverImageInPersistence struct {
 type UpdatePostContentDTO struct {
 	ID         string `json:"id" binding:"required,len=36"`
 	NewContent string `json:"new_content" binding:"required"`
+}
+
+type LikePostDTO struct {
+	UserID string `json:"user_id" binding:"required"`
+	PostID string `json:"post_id" binding:"required"`
+}
+type LikePostInPersistence struct {
+	ID     string `db:"id"`
+	UserID string `db:"user_id"`
+	PostID string `db:"post_id"`
 }
