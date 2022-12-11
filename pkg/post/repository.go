@@ -2,9 +2,9 @@ package post
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
-	"github.com/iugstav/colatech-api/pkg/comment"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -12,7 +12,7 @@ type IPostsRepository interface {
 	Create(post *Post) error
 	GetAll() ([]*Post, error)
 	GetAllMinified() ([]*ResumedPost, error)
-	GetById(id string) (*GetPostByIdPersistence, error)
+	GetById(id string) (*GetPostByIdFromRepository, error)
 	UpdateContent(dto *UpdatePostContentDTO) error
 	UploadImage(dto *UploadPostCoverImageInPersistence) error
 	LikePost(data *LikePostInPersistence) error
@@ -76,37 +76,26 @@ func (r *PostsRepository) GetAllMinified() ([]*ResumedPost, error) {
 	return posts, nil
 }
 
-func (r *PostsRepository) GetById(id string) (*GetPostByIdPersistence, error) {
-	var post PostFromPersistence
-	var postComments []comment.Comment
+func (r *PostsRepository) GetById(id string) (*GetPostByIdFromRepository, error) {
+	var post GetPostByIdFromRepository
+
+	if exists := r.Exists(id); !exists {
+		errorMsg := fmt.Errorf("GetById: post with provided id %s does not exists", id)
+
+		return nil, errorMsg
+	}
 
 	postsQuery := `SELECT p.id, p.title, p.slug, p.content, p.category_id, p.published_at, p.cover_image_url, c.name AS category_name 
 			FROM posts p 
 			LEFT JOIN categories c ON p.category_id=c.id 
 			WHERE p.id=$1`
 
-	commentsQuery := `SELECT p.id, p.reader_id, p.post_id, 
-				p.parent_id, p.content, p.published_at, 
-				r.first_name, r.last_name, r.image_url FROM post_comments p 
-				LEFT JOIN readers r ON p.reader_id=r.id
-				WHERE p.post_id=$1`
-
 	err := r.DB.Get(&post, postsQuery, id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.DB.Select(&postComments, commentsQuery, id)
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetPostByIdPersistence{
-		post,
-		postComments,
-	}
-
-	return response, nil
+	return &post, nil
 }
 
 func (r *PostsRepository) UpdateContent(dto *UpdatePostContentDTO) error {

@@ -29,22 +29,6 @@ type ResumedPost struct {
 	PublishedAt   time.Time `json:"published_at"`
 }
 
-type PostFromPersistence struct {
-	ID            string    `json:"id" db:"id"`
-	Title         string    `json:"title" db:"title"`
-	Slug          string    `json:"slug" db:"slug"`
-	CoverImageURL string    `json:"cover_image_url" db:"cover_image_url"`
-	Content       string    `json:"content" db:"content"`
-	CategoryID    string    `json:"category_id" db:"category_id"`
-	CategoryName  string    `json:"category_name" db:"category_name"`
-	PublishedAt   time.Time `json:"published_at" db:"published_at"`
-}
-
-type GetPostByIdPersistence struct {
-	PostFromPersistence
-	Comments []comment.Comment
-}
-
 type GetPostByIdServiceResponse struct {
 	ID            string            `json:"id"`
 	Title         string            `json:"title"`
@@ -53,6 +37,19 @@ type GetPostByIdServiceResponse struct {
 	Content       string            `json:"content"`
 	Category      category.Category `json:"category"`
 	PublishedAt   time.Time         `json:"published_at"`
+
+	Comments []comment.CommentFromPersistence `json:"comments"`
+}
+
+type GetPostByIdFromRepository struct {
+	ID            string    `json:"id" db:"id"`
+	Title         string    `json:"title" db:"title"`
+	Slug          string    `json:"slug" db:"slug"`
+	CoverImageURL string    `json:"cover_image_url" db:"cover_image_url"`
+	Content       string    `json:"content" db:"content"`
+	CategoryID    string    `json:"category_id" db:"category_id"`
+	CategoryName  string    `json:"category_name" db:"category_name"`
+	PublishedAt   time.Time `json:"published_at" db:"published_at"`
 }
 
 type CreatePostFromEndpoint struct {

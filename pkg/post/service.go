@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/iugstav/colatech-api/internal/cloud"
 	"github.com/iugstav/colatech-api/pkg/category"
+	"github.com/iugstav/colatech-api/pkg/comment"
 	"github.com/pkg/errors"
 )
 
@@ -26,11 +27,12 @@ type IPostService interface {
 }
 
 type PostService struct {
-	PostsRepository IPostsRepository
+	PostsRepository    IPostsRepository
+	CommentsRepository comment.ICommentsRepository
 }
 
-func GenerateNewPostService(repo IPostsRepository) *PostService {
-	return &PostService{PostsRepository: repo}
+func GenerateNewPostService(postsRepo IPostsRepository, commentsRepo comment.ICommentsRepository) *PostService {
+	return &PostService{PostsRepository: postsRepo, CommentsRepository: commentsRepo}
 }
 
 func (s *PostService) Create(data *CreatePostServiceRequest) (*Post, error) {
@@ -135,6 +137,11 @@ func (s *PostService) GetById(id string) (*GetPostByIdServiceResponse, error) {
 		return nil, err
 	}
 
+	cmt, commentErr := s.CommentsRepository.GetAllFromAPost(id)
+	if commentErr != nil {
+		return nil, err
+	}
+
 	post := &GetPostByIdServiceResponse{
 		ID:            response.ID,
 		Title:         response.Title,
@@ -146,6 +153,7 @@ func (s *PostService) GetById(id string) (*GetPostByIdServiceResponse, error) {
 			Name: response.CategoryName,
 		},
 		PublishedAt: response.PublishedAt,
+		Comments:    *cmt,
 	}
 
 	return post, nil

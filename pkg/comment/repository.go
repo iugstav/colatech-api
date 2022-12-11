@@ -4,7 +4,7 @@ import "github.com/jmoiron/sqlx"
 
 type ICommentsRepository interface {
 	Create(comment *Comment) error
-	GetAllFromAPost(postId string) ([]*CommentFromPersistence, error)
+	GetAllFromAPost(postId string) (*[]CommentFromPersistence, error)
 	UpdateContent(dto *UpdateCommentContentDTO) error
 	Delete(id string) error
 }
@@ -29,8 +29,8 @@ func (r *CommentsRepository) Create(comment *Comment) error {
 	return nil
 }
 
-func (r *CommentsRepository) GetAllFromAPost(postId string) ([]*CommentFromPersistence, error) {
-	var comments []*CommentFromPersistence
+func (r *CommentsRepository) GetAllFromAPost(postId string) (*[]CommentFromPersistence, error) {
+	var comments *[]CommentFromPersistence
 
 	err := r.DB.Select(
 		&comments,

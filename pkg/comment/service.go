@@ -61,7 +61,7 @@ func (s *CommentService) GetAllFromAPost(postId string) ([]*GetAllFromAPostServi
 		return nil, responseErr
 	}
 
-	for _, comment := range response {
+	for _, comment := range *response {
 		dataToAppend := &GetAllFromAPostServiceResponse{
 			ID:              comment.ID,
 			PostId:          comment.PostId,

@@ -16,7 +16,7 @@ func SetupRoutes(r *gin.RouterGroup, db *sqlx.DB) {
 	categoriesRepository := category.GenerateNewCategoriesRepository(db)
 	usersRepository := user.GenerateNewUsersRepository(db)
 
-	postService := post.GenerateNewPostService(postsRepository)
+	postService := post.GenerateNewPostService(postsRepository, commentsRepository)
 	commentService := comment.GenerateNewCommentService(commentsRepository)
 	categoryService := category.GenerateNewCategoryService(*categoriesRepository)
 	userService := user.GenerateNewUserService(usersRepository)

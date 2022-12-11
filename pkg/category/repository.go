@@ -5,6 +5,7 @@ import "github.com/jmoiron/sqlx"
 type ICategoriesRepository interface {
 	Create(category *Category) error
 	GetAll() ([]*Category, error)
+	GetById(id string) (*Category, error)
 	UpdateName(category *Category) error
 	Delete(id string) error
 }
@@ -37,6 +38,17 @@ func (r *CategoriesRepository) GetAll() ([]*Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (r *CategoriesRepository) GetById(id string) (*Category, error) {
+	var category Category
+
+	err := r.DB.Get(&category, "SELECT * FROM categories WHERE id=$1", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
 }
 
 func (r *CategoriesRepository) UpdateName(category *Category) error {
