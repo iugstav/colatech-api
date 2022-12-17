@@ -13,14 +13,14 @@ type ICategoriesRepository interface {
 	GetById(id string) (*Category, error)
 	UpdateName(category *Category) error
 	Delete(id string) error
-	Exists(id string) error
+	Exists(id string) bool
 }
 
 type CategoriesRepository struct {
 	DB *sqlx.DB
 }
 
-func GenerateNewCategoriesRepository(db *sqlx.DB) *CategoriesRepository {
+func GenerateNewCategoriesRepository(db *sqlx.DB) ICategoriesRepository {
 	return &CategoriesRepository{DB: db}
 }
 
