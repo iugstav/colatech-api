@@ -3,30 +3,29 @@ package mock
 import (
 	"fmt"
 
-	"github.com/iugstav/colatech-api/pkg/comment"
-	"github.com/iugstav/colatech-api/pkg/user"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type CommentsRepositoryMock struct {
-	DB              []*comment.Comment
-	UsersRepository user.IUsersRepository
+	DB              []*entities.Comment
+	UsersRepository entities.IUsersRepository
 }
 
-func GenerateNewMockedCommentsRepository(usersRepo user.IUsersRepository) *CommentsRepositoryMock {
+func GenerateNewMockedCommentsRepository(usersRepo entities.IUsersRepository) *CommentsRepositoryMock {
 	return &CommentsRepositoryMock{
-		DB:              []*comment.Comment{},
+		DB:              []*entities.Comment{},
 		UsersRepository: usersRepo,
 	}
 }
 
-func (rm *CommentsRepositoryMock) Create(comment *comment.Comment) error {
+func (rm *CommentsRepositoryMock) Create(comment *entities.Comment) error {
 	rm.DB = append(rm.DB, comment)
 
 	return nil
 }
 
-func (rm *CommentsRepositoryMock) GetAllFromAPost(postId string) (*[]comment.CommentFromPersistence, error) {
-	var comments []comment.CommentFromPersistence
+func (rm *CommentsRepositoryMock) GetAllFromAPost(postId string) (*[]entities.CommentFromPersistence, error) {
+	var comments []entities.CommentFromPersistence
 
 	for _, c := range rm.DB {
 		if c.PostId == postId {
@@ -37,7 +36,7 @@ func (rm *CommentsRepositoryMock) GetAllFromAPost(postId string) (*[]comment.Com
 				return nil, unknownReaderError
 			}
 
-			comment := comment.CommentFromPersistence{
+			comment := entities.CommentFromPersistence{
 				ID:              c.ID,
 				ReaderId:        c.ReaderId,
 				ReaderFirstName: user.FirstName,
@@ -55,10 +54,10 @@ func (rm *CommentsRepositoryMock) GetAllFromAPost(postId string) (*[]comment.Com
 	return &comments, nil
 }
 
-func (rm *CommentsRepositoryMock) UpdateContent(dto *comment.UpdateCommentContentDTO) error {
+func (rm *CommentsRepositoryMock) UpdateContent(dto *entities.Comment) error {
 	for _, c := range rm.DB {
 		if c.ID == dto.ID {
-			c.Content = dto.NewContent
+			c.Content = dto.Content
 		}
 	}
 
@@ -66,7 +65,7 @@ func (rm *CommentsRepositoryMock) UpdateContent(dto *comment.UpdateCommentConten
 }
 
 func (rm *CommentsRepositoryMock) Delete(id string) error {
-	var newMock []*comment.Comment
+	var newMock []*entities.Comment
 
 	for _, c := range rm.DB {
 		if c.ID != id {

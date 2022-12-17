@@ -1,18 +1,9 @@
-package comment
+package entities
 
 import (
 	"database/sql"
 	"time"
 )
-
-type Comment struct {
-	ID              string         `json:"id" db:"id"`
-	ReaderId        string         `json:"reader_id" db:"reader_id"`
-	PostId          string         `json:"post_id" db:"post_id"`
-	ParentCommentId sql.NullString `json:"parent_comment_id,omitempty" db:"parent_id"`
-	Content         string         `json:"content" db:"content"`
-	PublishedAt     time.Time      `json:"published_at" db:"published_at"`
-}
 
 type CommentFromPersistence struct {
 	ID              string         `json:"id" db:"id"`
@@ -54,9 +45,4 @@ type CreateCommentServiceRequest struct {
 	ParentCommentId string
 	Content         string
 	PublishedAt     string
-}
-
-type UpdateCommentContentDTO struct {
-	ID         string `json:"id" db:"id" binding:"required,len=36"`
-	NewContent string `json:"new_content" db:"content" binding:"required"`
 }

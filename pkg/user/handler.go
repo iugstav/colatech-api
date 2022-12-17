@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/iugstav/colatech-api/internal/imgconv"
 )
 
@@ -23,7 +24,7 @@ func GenerateUserHandler(service IUserService) *UserHandler {
 
 func (h *UserHandler) CreateUserController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request CreateUserFromEndpoint
+		var request entities.CreateUserFromEndpoint
 		userCommonId := uuid.NewString()
 
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -34,7 +35,7 @@ func (h *UserHandler) CreateUserController() gin.HandlerFunc {
 			return
 		}
 
-		user := CreateUserServiceRequest{
+		user := entities.CreateUserServiceRequest{
 			ID:              userCommonId,
 			UserName:        request.UserName,
 			FirstName:       request.FirstName,
@@ -60,7 +61,7 @@ func (h *UserHandler) CreateUserController() gin.HandlerFunc {
 
 func (h *UserHandler) UploadProfileImageController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request UploadProfileImageFromEndpoint
+		var request entities.UploadProfileImageFromEndpoint
 
 		if err := c.ShouldBindWith(&request, binding.Form); err != nil {
 			log.Println("err: ", err)
@@ -119,7 +120,7 @@ func (h *UserHandler) UploadProfileImageController() gin.HandlerFunc {
 		}
 		webpFile.Write(webpImage)
 
-		data := UploadProfileImageRequest{
+		data := entities.UploadProfileImageRequest{
 			File:                   webpFile,
 			ID:                     request.UserID,
 			NameToUpload:           newName,
@@ -143,7 +144,7 @@ func (h *UserHandler) UploadProfileImageController() gin.HandlerFunc {
 
 func (h *UserHandler) AuthenticateUserController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request AuthenticateUserServiceRequest
+		var request entities.AuthenticateUserServiceRequest
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

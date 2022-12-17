@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/iugstav/colatech-api/internal/imgconv"
 )
 
@@ -26,7 +27,7 @@ func GeneratePostHandler(service IPostService) *PostHandler {
 func (h *PostHandler) CreatePostController() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TRANSFORMAR EM JSON PQ SEPAREI O UPLOAD DE IMAGEM EM UM ENDPOINT
-		var request CreatePostFromEndpoint
+		var request entities.CreatePostFromEndpoint
 		postCommonId := uuid.NewString()
 
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -38,7 +39,7 @@ func (h *PostHandler) CreatePostController() gin.HandlerFunc {
 			return
 		}
 
-		data := CreatePostServiceRequest{
+		data := entities.CreatePostServiceRequest{
 			ID:          postCommonId,
 			Title:       request.Title,
 			Slug:        request.Slug,
@@ -63,7 +64,7 @@ func (h *PostHandler) CreatePostController() gin.HandlerFunc {
 
 func (h *PostHandler) UploadImageController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request UploadPostCoverImageFromEndpoint
+		var request entities.UploadPostCoverImageFromEndpoint
 
 		if err := c.ShouldBindWith(&request, binding.Form); err != nil {
 			log.Println("err: ", err)
@@ -123,7 +124,7 @@ func (h *PostHandler) UploadImageController() gin.HandlerFunc {
 		}
 		webpFile.Write(webpImage)
 
-		data := UploadPostCoverImageRequest{
+		data := entities.UploadPostCoverImageRequest{
 			File:                 webpFile,
 			ID:                   request.PostID,
 			NameToUpload:         newName,
@@ -200,7 +201,7 @@ func (h *PostHandler) GetPostByIdController() gin.HandlerFunc {
 
 func (h *PostHandler) UpdatePostContentController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request UpdatePostContentDTO
+		var request entities.UpdatePostContentDTO
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -226,7 +227,7 @@ func (h *PostHandler) UpdatePostContentController() gin.HandlerFunc {
 
 func (h *PostHandler) LikePostController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request LikePostDTO
+		var request entities.LikePostDTO
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

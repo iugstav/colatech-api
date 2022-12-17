@@ -5,32 +5,19 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/iugstav/colatech-api/pkg/likes"
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/jmoiron/sqlx"
 )
-
-type IPostsRepository interface {
-	Create(post *Post) error
-	GetAll() ([]*Post, error)
-	GetAllMinified() ([]*ResumedPost, error)
-	GetById(id string) (*GetPostByIdFromRepository, error)
-	UpdateContent(dto *UpdatePostContentDTO) error
-	UploadImage(dto *UploadPostCoverImageInPersistence) error
-	LikePost(data *likes.LikePostInPersistence) error
-	Delete(id string) error
-	Exists(id string) bool
-	BothUserAndPostExists(userId string, postId string) (bool, bool)
-}
 
 type PostsRepository struct {
 	DB *sqlx.DB
 }
 
-func GenerateNewPostsRepository(db *sqlx.DB) *PostsRepository {
+func GenerateNewPostsRepository(db *sqlx.DB) entities.IPostsRepository {
 	return &PostsRepository{DB: db}
 }
 
-func (r *PostsRepository) Create(post *Post) error {
+func (r *PostsRepository) Create(post *entities.Post) error {
 	query := `INSERT INTO posts(id, title, slug, intro, content, category_id, published_at, cover_image_url)
 	VALUES(:id, :title, :slug, :intro, :content, :category_id, :published_at, :cover_image_url)`
 
@@ -42,7 +29,7 @@ func (r *PostsRepository) Create(post *Post) error {
 	return nil
 }
 
-func (r *PostsRepository) UploadImage(dto *UploadPostCoverImageInPersistence) error {
+func (r *PostsRepository) UploadImage(dto *entities.UploadPostCoverImageInPersistence) error {
 	query := `UPDATE posts SET cover_image_url=$1 WHERE id=$2`
 
 	if _, err := r.DB.Exec(query, dto.CoverImageURL, dto.ID); err != nil {
@@ -52,8 +39,8 @@ func (r *PostsRepository) UploadImage(dto *UploadPostCoverImageInPersistence) er
 	return nil
 }
 
-func (r *PostsRepository) GetAll() ([]*Post, error) {
-	posts := []*Post{}
+func (r *PostsRepository) GetAll() ([]*entities.Post, error) {
+	posts := []*entities.Post{}
 	query := `SELECT * FROM posts ORDER BY published_at ASC`
 
 	err := r.DB.Select(&posts, query)
@@ -64,8 +51,8 @@ func (r *PostsRepository) GetAll() ([]*Post, error) {
 	return posts, nil
 }
 
-func (r *PostsRepository) GetAllMinified() ([]*ResumedPost, error) {
-	posts := []*ResumedPost{}
+func (r *PostsRepository) GetAllMinified() ([]*entities.ResumedPost, error) {
+	posts := []*entities.ResumedPost{}
 	query := `SELECT id, title, slug, cover_image_url, intro, category_id, published_at
 	FROM posts ORDER BY published_at ASC`
 
@@ -77,8 +64,8 @@ func (r *PostsRepository) GetAllMinified() ([]*ResumedPost, error) {
 	return posts, nil
 }
 
-func (r *PostsRepository) GetById(id string) (*GetPostByIdFromRepository, error) {
-	var post GetPostByIdFromRepository
+func (r *PostsRepository) GetById(id string) (*entities.GetPostByIdFromRepository, error) {
+	var post entities.GetPostByIdFromRepository
 
 	if exists := r.Exists(id); !exists {
 		errorMsg := fmt.Errorf("GetById: post with provided id %s does not exists", id)
@@ -99,7 +86,7 @@ func (r *PostsRepository) GetById(id string) (*GetPostByIdFromRepository, error)
 	return &post, nil
 }
 
-func (r *PostsRepository) UpdateContent(dto *UpdatePostContentDTO) error {
+func (r *PostsRepository) UpdateContent(dto *entities.UpdatePostContentDTO) error {
 	_, err := r.DB.Exec(`UPDATE posts SET content=$1 WHERE id=$2`, dto.NewContent, dto.ID)
 	if err != nil {
 		return err
@@ -108,7 +95,7 @@ func (r *PostsRepository) UpdateContent(dto *UpdatePostContentDTO) error {
 	return nil
 }
 
-func (r *PostsRepository) LikePost(data *likes.LikePostInPersistence) error {
+func (r *PostsRepository) LikePost(data *entities.LikePostInPersistence) error {
 	query := `INSERT INTO likes(id, user_id, post_id) VALUES(:id, :user_id, :post_id)`
 
 	_, err := r.DB.NamedExec(query, &data)

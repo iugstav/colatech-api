@@ -5,27 +5,28 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type ICategoryService interface {
-	Create(name string) (*Category, error)
-	GetAll() ([]*Category, error)
-	UpdateName(category *Category) error
+	Create(name string) (*entities.Category, error)
+	GetAll() ([]*entities.Category, error)
+	UpdateName(category *entities.Category) error
 	Delete(id string) error
 }
 
 type CategoryService struct {
-	CategoriesRepository ICategoriesRepository
+	CategoriesRepository entities.ICategoriesRepository
 }
 
-func GenerateNewCategoryService(repository ICategoriesRepository) *CategoryService {
+func GenerateNewCategoryService(repository entities.ICategoriesRepository) *CategoryService {
 	return &CategoryService{CategoriesRepository: repository}
 }
 
-func (s *CategoryService) Create(name string) (*Category, error) {
+func (s *CategoryService) Create(name string) (*entities.Category, error) {
 	categoryId := uuid.New().String()
 
-	category := Category{
+	category := entities.Category{
 		ID:   categoryId,
 		Name: name,
 	}
@@ -37,7 +38,7 @@ func (s *CategoryService) Create(name string) (*Category, error) {
 	return &category, nil
 }
 
-func (s *CategoryService) GetAll() ([]*Category, error) {
+func (s *CategoryService) GetAll() ([]*entities.Category, error) {
 	response, err := s.CategoriesRepository.GetAll()
 	if err != nil {
 		return nil, err
@@ -46,7 +47,7 @@ func (s *CategoryService) GetAll() ([]*Category, error) {
 	return response, nil
 }
 
-func (s *CategoryService) UpdateName(category *Category) error {
+func (s *CategoryService) UpdateName(category *entities.Category) error {
 	_, err := uuid.Parse(category.ID)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())

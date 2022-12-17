@@ -3,45 +3,42 @@ package mock
 import (
 	"fmt"
 
-	"github.com/iugstav/colatech-api/pkg/category"
-	"github.com/iugstav/colatech-api/pkg/likes"
-	"github.com/iugstav/colatech-api/pkg/post"
-	"github.com/iugstav/colatech-api/pkg/user"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type PostsRepositoryMock struct {
-	DB                   []*post.Post
-	CategoriesRepository category.ICategoriesRepository
-	LikesRepository      likes.ILikesRepository
-	UsersRepository      user.IUsersRepository
+	DB                   []*entities.Post
+	CategoriesRepository entities.ICategoriesRepository
+	LikesRepository      entities.ILikesRepository
+	UsersRepository      entities.IUsersRepository
 }
 
-func GenerateNewMockedPostsRepository(categoriesRepo category.ICategoriesRepository, likesRepo likes.ILikesRepository, usersRepo user.IUsersRepository) *PostsRepositoryMock {
+func GenerateNewMockedPostsRepository(categoriesRepo entities.ICategoriesRepository, likesRepo entities.ILikesRepository, usersRepo entities.IUsersRepository) *PostsRepositoryMock {
 	return &PostsRepositoryMock{
-		DB:                   []*post.Post{},
+		DB:                   []*entities.Post{},
 		CategoriesRepository: categoriesRepo,
 		LikesRepository:      likesRepo,
 		UsersRepository:      usersRepo,
 	}
 }
 
-func (rm *PostsRepositoryMock) Create(p *post.Post) error {
+func (rm *PostsRepositoryMock) Create(p *entities.Post) error {
 	rm.DB = append(rm.DB, p)
 
 	return nil
 }
 
-func (rm PostsRepositoryMock) GetAll() ([]*post.Post, error) {
+func (rm PostsRepositoryMock) GetAll() ([]*entities.Post, error) {
 	response := rm.DB
 
 	return response, nil
 }
 
-func (rm *PostsRepositoryMock) GetAllMinified() ([]*post.ResumedPost, error) {
-	response := []*post.ResumedPost{}
+func (rm *PostsRepositoryMock) GetAllMinified() ([]*entities.ResumedPost, error) {
+	response := []*entities.ResumedPost{}
 
 	for _, p := range rm.DB {
-		data := post.ResumedPost{
+		data := entities.ResumedPost{
 			ID:            p.ID,
 			Title:         p.Title,
 			Slug:          p.Slug,
@@ -56,7 +53,7 @@ func (rm *PostsRepositoryMock) GetAllMinified() ([]*post.ResumedPost, error) {
 	return response, nil
 }
 
-func (rm *PostsRepositoryMock) GetById(id string) (*post.GetPostByIdFromRepository, error) {
+func (rm *PostsRepositoryMock) GetById(id string) (*entities.GetPostByIdFromRepository, error) {
 	ct, err := rm.CategoriesRepository.GetById(id)
 	if err != nil {
 		return nil, err
@@ -64,7 +61,7 @@ func (rm *PostsRepositoryMock) GetById(id string) (*post.GetPostByIdFromReposito
 
 	for _, p := range rm.DB {
 		if p.ID == id {
-			fromPersistence := post.GetPostByIdFromRepository{
+			fromPersistence := entities.GetPostByIdFromRepository{
 				ID:            p.ID,
 				Title:         p.Title,
 				Slug:          p.Slug,
@@ -84,7 +81,7 @@ func (rm *PostsRepositoryMock) GetById(id string) (*post.GetPostByIdFromReposito
 	return nil, errorMsg
 }
 
-func (rm *PostsRepositoryMock) UpdateContent(data *post.UpdatePostContentDTO) error {
+func (rm *PostsRepositoryMock) UpdateContent(data *entities.UpdatePostContentDTO) error {
 	post, err := rm.GetById(data.ID)
 	if err != nil {
 		return err
@@ -95,7 +92,7 @@ func (rm *PostsRepositoryMock) UpdateContent(data *post.UpdatePostContentDTO) er
 	return nil
 }
 
-func (rm *PostsRepositoryMock) UploadImage(data *post.UploadPostCoverImageInPersistence) error {
+func (rm *PostsRepositoryMock) UploadImage(data *entities.UploadPostCoverImageInPersistence) error {
 	post, err := rm.GetById(data.ID)
 	if err != nil {
 		return err
@@ -106,7 +103,7 @@ func (rm *PostsRepositoryMock) UploadImage(data *post.UploadPostCoverImageInPers
 	return nil
 }
 
-func (rm *PostsRepositoryMock) LikePost(data *likes.LikePostInPersistence) error {
+func (rm *PostsRepositoryMock) LikePost(data *entities.LikePostInPersistence) error {
 	err := rm.LikesRepository.LikePost(data)
 	if err != nil {
 		return err
@@ -116,7 +113,7 @@ func (rm *PostsRepositoryMock) LikePost(data *likes.LikePostInPersistence) error
 }
 
 func (rm *PostsRepositoryMock) Delete(id string) error {
-	var newMock []*post.Post
+	var newMock []*entities.Post
 
 	for _, p := range rm.DB {
 		if p.ID != id {

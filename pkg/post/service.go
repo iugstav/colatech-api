@@ -10,39 +10,37 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/iugstav/colatech-api/internal/cloud"
-	"github.com/iugstav/colatech-api/pkg/category"
-	"github.com/iugstav/colatech-api/pkg/comment"
-	"github.com/iugstav/colatech-api/pkg/likes"
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/pkg/errors"
 )
 
 type IPostService interface {
-	Create(data *CreatePostServiceRequest) (*Post, error)
-	GetAll() ([]*Post, error)
-	GetAllMinified() ([]*ResumedPost, error)
-	GetById(id string) (*GetPostByIdServiceResponse, error)
-	UpdateContent(data *UpdatePostContentDTO) error
-	UploadImage(data *UploadPostCoverImageRequest) error
-	LikePost(dto *LikePostDTO) error
+	Create(data *entities.CreatePostServiceRequest) (*entities.Post, error)
+	GetAll() ([]*entities.Post, error)
+	GetAllMinified() ([]*entities.ResumedPost, error)
+	GetById(id string) (*entities.GetPostByIdServiceResponse, error)
+	UpdateContent(data *entities.UpdatePostContentDTO) error
+	UploadImage(data *entities.UploadPostCoverImageRequest) error
+	LikePost(dto *entities.LikePostDTO) error
 	Delete(id string) error
 }
 
 type PostService struct {
-	PostsRepository    IPostsRepository
-	CommentsRepository comment.ICommentsRepository
+	PostsRepository    entities.IPostsRepository
+	CommentsRepository entities.ICommentsRepository
 }
 
-func GenerateNewPostService(postsRepo IPostsRepository, commentsRepo comment.ICommentsRepository) *PostService {
+func GenerateNewPostService(postsRepo entities.IPostsRepository, commentsRepo entities.ICommentsRepository) *PostService {
 	return &PostService{PostsRepository: postsRepo, CommentsRepository: commentsRepo}
 }
 
-func (s *PostService) Create(data *CreatePostServiceRequest) (*Post, error) {
+func (s *PostService) Create(data *entities.CreatePostServiceRequest) (*entities.Post, error) {
 	formattedPostDate, parseErr := time.Parse("2006-01-02 03:04:05", data.PublishedAt)
 	if parseErr != nil {
 		return nil, parseErr
 	}
 
-	post := &Post{
+	post := &entities.Post{
 		ID:            data.ID,
 		Title:         data.Title,
 		Slug:          data.Slug,
@@ -61,7 +59,7 @@ func (s *PostService) Create(data *CreatePostServiceRequest) (*Post, error) {
 	return post, nil
 }
 
-func (s *PostService) UploadImage(data *UploadPostCoverImageRequest) error {
+func (s *PostService) UploadImage(data *entities.UploadPostCoverImageRequest) error {
 	defer data.File.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -94,7 +92,7 @@ func (s *PostService) UploadImage(data *UploadPostCoverImageRequest) error {
 		os.Getenv("FIREBASE_STORAGE_BUCKET_NAME"),
 		"posts%2F"+data.NameToUpload)
 
-	d := &UploadPostCoverImageInPersistence{
+	d := &entities.UploadPostCoverImageInPersistence{
 		ID:            data.ID,
 		CoverImageURL: imageURL,
 	}
@@ -107,7 +105,7 @@ func (s *PostService) UploadImage(data *UploadPostCoverImageRequest) error {
 	return nil
 }
 
-func (s *PostService) GetAll() ([]*Post, error) {
+func (s *PostService) GetAll() ([]*entities.Post, error) {
 	response, err := s.PostsRepository.GetAll()
 	if err != nil {
 		return nil, err
@@ -116,7 +114,7 @@ func (s *PostService) GetAll() ([]*Post, error) {
 	return response, nil
 }
 
-func (s *PostService) GetAllMinified() ([]*ResumedPost, error) {
+func (s *PostService) GetAllMinified() ([]*entities.ResumedPost, error) {
 	response, err := s.PostsRepository.GetAllMinified()
 	if err != nil {
 		return nil, err
@@ -125,7 +123,7 @@ func (s *PostService) GetAllMinified() ([]*ResumedPost, error) {
 	return response, nil
 }
 
-func (s *PostService) GetById(id string) (*GetPostByIdServiceResponse, error) {
+func (s *PostService) GetById(id string) (*entities.GetPostByIdServiceResponse, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
@@ -143,13 +141,13 @@ func (s *PostService) GetById(id string) (*GetPostByIdServiceResponse, error) {
 		return nil, err
 	}
 
-	post := &GetPostByIdServiceResponse{
+	post := &entities.GetPostByIdServiceResponse{
 		ID:            response.ID,
 		Title:         response.Title,
 		Slug:          response.Slug,
 		Content:       response.Content,
 		CoverImageURL: response.CoverImageURL,
-		Category: category.Category{
+		Category: entities.Category{
 			ID:   response.CategoryID,
 			Name: response.CategoryName,
 		},
@@ -160,7 +158,7 @@ func (s *PostService) GetById(id string) (*GetPostByIdServiceResponse, error) {
 	return post, nil
 }
 
-func (s *PostService) UpdateContent(data *UpdatePostContentDTO) error {
+func (s *PostService) UpdateContent(data *entities.UpdatePostContentDTO) error {
 	_, err := uuid.Parse(data.ID)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
@@ -176,7 +174,7 @@ func (s *PostService) UpdateContent(data *UpdatePostContentDTO) error {
 	return nil
 }
 
-func (s *PostService) LikePost(dto *LikePostDTO) error {
+func (s *PostService) LikePost(dto *entities.LikePostDTO) error {
 	_, err := uuid.Parse(dto.UserID)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
@@ -204,7 +202,7 @@ func (s *PostService) LikePost(dto *LikePostDTO) error {
 
 	likeID := uuid.NewString()
 
-	data := &likes.LikePostInPersistence{
+	data := &entities.LikePostInPersistence{
 		ID:     likeID,
 		UserID: dto.UserID,
 		PostID: dto.PostID,

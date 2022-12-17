@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type CommentHandler struct {
@@ -16,7 +17,7 @@ func GenerateCommentHandler(service ICommentService) *CommentHandler {
 
 func (h *CommentHandler) CreateCommentController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request CreateCommentFromEndpoint
+		var request entities.CreateCommentFromEndpoint
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -26,7 +27,7 @@ func (h *CommentHandler) CreateCommentController() gin.HandlerFunc {
 			return
 		}
 
-		comment := CreateCommentServiceRequest(request)
+		comment := entities.CreateCommentServiceRequest(request)
 
 		response, serviceErr := h.CommentService.Create(&comment)
 		if serviceErr != nil {
@@ -62,7 +63,7 @@ func (h *CommentHandler) GetAllCommetsFromAPostController() gin.HandlerFunc {
 
 func (h *CommentHandler) UpdateCommentContentController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var request UpdateCommentContentDTO
+		var request entities.Comment
 
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

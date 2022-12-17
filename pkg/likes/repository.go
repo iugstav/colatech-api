@@ -4,19 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/jmoiron/sqlx"
 )
-
-type ILikesRepository interface {
-	LikePost(data *LikePostInPersistence) error
-	DislikePost(data *LikePostInPersistence) error
-}
 
 type LikesRepository struct {
 	DB *sqlx.DB
 }
 
-func (r *LikesRepository) LikePost(data *LikePostInPersistence) error {
+func (r *LikesRepository) LikePost(data *entities.LikePostInPersistence) error {
 	query := `INSERT INTO likes(id, user_id, post_id) VALUES(:id, :user_id, :post_id)`
 
 	_, err := r.DB.NamedExec(query, &data)
@@ -27,7 +23,7 @@ func (r *LikesRepository) LikePost(data *LikePostInPersistence) error {
 	return nil
 }
 
-func (r *LikesRepository) DislikePost(data *LikePostInPersistence) error {
+func (r *LikesRepository) DislikePost(data *entities.LikePostInPersistence) error {
 	var exists bool
 
 	existenceQuery := `SELECT EXISTS(

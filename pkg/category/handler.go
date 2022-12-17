@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type CategoryHandler struct {
@@ -64,7 +65,7 @@ func (h *CategoryHandler) GetAllCategoriesController() gin.HandlerFunc {
 
 func (h *CategoryHandler) UpdateCategoryNameController() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var category Category
+		var category entities.Category
 
 		if err := c.ShouldBindJSON(&category); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

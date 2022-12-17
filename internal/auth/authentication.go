@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"firebase.google.com/go/v4/auth"
-	"github.com/iugstav/colatech-api/pkg/user"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
-func CreateUser(data *user.CreateFirebaseUserData, client *auth.Client) (*auth.UserRecord, error) {
+func CreateUser(data *entities.CreateFirebaseUserData, client *auth.Client) (*auth.UserRecord, error) {
 	params := (&auth.UserToCreate{}).
 		UID(data.ID).
 		Email(data.Email).

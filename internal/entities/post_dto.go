@@ -1,23 +1,9 @@
-package post
+package entities
 
 import (
 	"os"
 	"time"
-
-	"github.com/iugstav/colatech-api/pkg/category"
-	"github.com/iugstav/colatech-api/pkg/comment"
 )
-
-type Post struct {
-	ID            string    `json:"id" db:"id"`
-	Title         string    `json:"title" db:"title"`
-	Slug          string    `json:"slug" db:"slug"`
-	CoverImageURL string    `json:"cover_image_url" db:"cover_image_url"`
-	Intro         string    `json:"intro" db:"intro"`
-	Content       string    `json:"content" db:"content"`
-	CategoryID    string    `json:"category_id" db:"category_id"`
-	PublishedAt   time.Time `json:"published_at" db:"published_at"`
-}
 
 type ResumedPost struct {
 	ID            string    `json:"id"`
@@ -30,15 +16,15 @@ type ResumedPost struct {
 }
 
 type GetPostByIdServiceResponse struct {
-	ID            string            `json:"id"`
-	Title         string            `json:"title"`
-	Slug          string            `json:"slug"`
-	CoverImageURL string            `json:"cover_image_url"`
-	Content       string            `json:"content"`
-	Category      category.Category `json:"category"`
-	PublishedAt   time.Time         `json:"published_at"`
+	ID            string    `json:"id"`
+	Title         string    `json:"title"`
+	Slug          string    `json:"slug"`
+	CoverImageURL string    `json:"cover_image_url"`
+	Content       string    `json:"content"`
+	Category      Category  `json:"category"`
+	PublishedAt   time.Time `json:"published_at"`
 
-	Comments []comment.CommentFromPersistence `json:"comments"`
+	Comments []CommentFromPersistence `json:"comments"`
 }
 
 type GetPostByIdFromRepository struct {

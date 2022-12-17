@@ -4,26 +4,19 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/jmoiron/sqlx"
 )
-
-type IUsersRepository interface {
-	Create(user *User) error
-	GetById(id string) (*User, error)
-	GetByEmail(email string) (*User, error)
-	UploadImage(dto *UploadProfileImageToPersistence) error
-	Exists(id string) bool
-}
 
 type UsersRepository struct {
 	DB *sqlx.DB
 }
 
-func GenerateNewUsersRepository(db *sqlx.DB) *UsersRepository {
+func GenerateNewUsersRepository(db *sqlx.DB) entities.IUsersRepository {
 	return &UsersRepository{DB: db}
 }
 
-func (r *UsersRepository) Create(user *User) error {
+func (r *UsersRepository) Create(user *entities.User) error {
 	query := `INSERT INTO readers(id, username, first_name, last_name, email, password, image_url, created_at)
 			  VALUES(:id, :username, :first_name, :last_name, :email, :password, '', :created_at)`
 
@@ -35,8 +28,8 @@ func (r *UsersRepository) Create(user *User) error {
 	return nil
 }
 
-func (r *UsersRepository) GetById(id string) (*User, error) {
-	var user User
+func (r *UsersRepository) GetById(id string) (*entities.User, error) {
+	var user entities.User
 
 	err := r.DB.Get(&user, "SELECT * FROM readers WHERE id=$1", id)
 	if err != nil {
@@ -46,8 +39,8 @@ func (r *UsersRepository) GetById(id string) (*User, error) {
 	return &user, nil
 }
 
-func (r *UsersRepository) GetByEmail(email string) (*User, error) {
-	var user User
+func (r *UsersRepository) GetByEmail(email string) (*entities.User, error) {
+	var user entities.User
 
 	err := r.DB.Get(&user, "SELECT * FROM readers WHERE email=$1", email)
 	if err != nil {
@@ -57,7 +50,7 @@ func (r *UsersRepository) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (r *UsersRepository) UploadImage(dto *UploadProfileImageToPersistence) error {
+func (r *UsersRepository) UploadImage(dto *entities.UploadProfileImageToPersistence) error {
 	_, err := r.DB.Exec(`UPDATE readers SET image_url=$1 WHERE id=$2`, dto.ProfileImageURL, dto.ID)
 	if err != nil {
 		return err

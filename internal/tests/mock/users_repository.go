@@ -3,26 +3,26 @@ package mock
 import (
 	"fmt"
 
-	"github.com/iugstav/colatech-api/pkg/user"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type UsersRepositoryMock struct {
-	DB []*user.User
+	DB []*entities.User
 }
 
 func GenerateNewMockedUsersRepository() *UsersRepositoryMock {
 	return &UsersRepositoryMock{
-		DB: []*user.User{},
+		DB: []*entities.User{},
 	}
 }
 
-func (rm *UsersRepositoryMock) Create(user *user.User) error {
+func (rm *UsersRepositoryMock) Create(user *entities.User) error {
 	rm.DB = append(rm.DB, user)
 
 	return nil
 }
 
-func (rm *UsersRepositoryMock) GetById(id string) (*user.User, error) {
+func (rm *UsersRepositoryMock) GetById(id string) (*entities.User, error) {
 	for _, u := range rm.DB {
 		if u.ID == id {
 			return u, nil
@@ -34,7 +34,7 @@ func (rm *UsersRepositoryMock) GetById(id string) (*user.User, error) {
 	return nil, errorMsg
 }
 
-func (rm *UsersRepositoryMock) GetByEmail(email string) (*user.User, error) {
+func (rm *UsersRepositoryMock) GetByEmail(email string) (*entities.User, error) {
 	for _, u := range rm.DB {
 		if u.Email == email {
 			return u, nil
@@ -46,7 +46,7 @@ func (rm *UsersRepositoryMock) GetByEmail(email string) (*user.User, error) {
 	return nil, errorMsg
 }
 
-func (rm *UsersRepositoryMock) UploadImage(dto *user.UploadProfileImageToPersistence) error {
+func (rm *UsersRepositoryMock) UploadImage(dto *entities.UploadProfileImageToPersistence) error {
 	for _, u := range rm.DB {
 		if u.ID == dto.ID {
 			u.ImageURL = dto.ProfileImageURL

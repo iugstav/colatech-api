@@ -1,23 +1,19 @@
 package comment
 
-import "github.com/jmoiron/sqlx"
-
-type ICommentsRepository interface {
-	Create(comment *Comment) error
-	GetAllFromAPost(postId string) (*[]CommentFromPersistence, error)
-	UpdateContent(dto *UpdateCommentContentDTO) error
-	Delete(id string) error
-}
+import (
+	"github.com/iugstav/colatech-api/internal/entities"
+	"github.com/jmoiron/sqlx"
+)
 
 type CommentsRepository struct {
 	DB *sqlx.DB
 }
 
-func GenerateNewCommentsRepository(db *sqlx.DB) *CommentsRepository {
+func GenerateNewCommentsRepository(db *sqlx.DB) entities.ICommentsRepository {
 	return &CommentsRepository{DB: db}
 }
 
-func (r *CommentsRepository) Create(comment *Comment) error {
+func (r *CommentsRepository) Create(comment *entities.Comment) error {
 	query := `INSERT INTO post_comments(id, reader_id, post_id, parent_id, content, published_at)
 			  VALUES(:id, :reader_id, :post_id, :parent_id, :content, :published_at)`
 
@@ -29,8 +25,8 @@ func (r *CommentsRepository) Create(comment *Comment) error {
 	return nil
 }
 
-func (r *CommentsRepository) GetAllFromAPost(postId string) (*[]CommentFromPersistence, error) {
-	var comments *[]CommentFromPersistence
+func (r *CommentsRepository) GetAllFromAPost(postId string) (*[]entities.CommentFromPersistence, error) {
+	var comments *[]entities.CommentFromPersistence
 
 	err := r.DB.Select(
 		&comments,
@@ -47,8 +43,8 @@ func (r *CommentsRepository) GetAllFromAPost(postId string) (*[]CommentFromPersi
 	return comments, nil
 }
 
-func (r *CommentsRepository) UpdateContent(dto *UpdateCommentContentDTO) error {
-	_, err := r.DB.Exec("UPDATE post_comments SET content=$1 WHERE id=$2", dto.ID, dto.NewContent)
+func (r *CommentsRepository) UpdateContent(dto *entities.Comment) error {
+	_, err := r.DB.Exec("UPDATE post_comments SET content=$1 WHERE id=$2", dto.ID, dto.Content)
 	if err != nil {
 		return err
 	}

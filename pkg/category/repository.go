@@ -4,27 +4,19 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/iugstav/colatech-api/internal/entities"
 	"github.com/jmoiron/sqlx"
 )
-
-type ICategoriesRepository interface {
-	Create(category *Category) error
-	GetAll() ([]*Category, error)
-	GetById(id string) (*Category, error)
-	UpdateName(category *Category) error
-	Delete(id string) error
-	Exists(id string) bool
-}
 
 type CategoriesRepository struct {
 	DB *sqlx.DB
 }
 
-func GenerateNewCategoriesRepository(db *sqlx.DB) ICategoriesRepository {
+func GenerateNewCategoriesRepository(db *sqlx.DB) entities.ICategoriesRepository {
 	return &CategoriesRepository{DB: db}
 }
 
-func (r *CategoriesRepository) Create(category *Category) error {
+func (r *CategoriesRepository) Create(category *entities.Category) error {
 	query := `INSERT INTO categories(id, name) VALUES(:id, :name)`
 
 	_, err := r.DB.NamedExec(query, category)
@@ -35,8 +27,8 @@ func (r *CategoriesRepository) Create(category *Category) error {
 	return nil
 }
 
-func (r *CategoriesRepository) GetAll() ([]*Category, error) {
-	var categories []*Category
+func (r *CategoriesRepository) GetAll() ([]*entities.Category, error) {
+	var categories []*entities.Category
 
 	err := r.DB.Select(&categories, "SELECT * FROM categories ORDER BY name ASC")
 	if err != nil {
@@ -46,8 +38,8 @@ func (r *CategoriesRepository) GetAll() ([]*Category, error) {
 	return categories, nil
 }
 
-func (r *CategoriesRepository) GetById(id string) (*Category, error) {
-	var category Category
+func (r *CategoriesRepository) GetById(id string) (*entities.Category, error) {
+	var category entities.Category
 
 	err := r.DB.Get(&category, "SELECT * FROM categories WHERE id=$1", id)
 	if err != nil {
@@ -57,7 +49,7 @@ func (r *CategoriesRepository) GetById(id string) (*Category, error) {
 	return &category, nil
 }
 
-func (r *CategoriesRepository) UpdateName(category *Category) error {
+func (r *CategoriesRepository) UpdateName(category *entities.Category) error {
 	_, err := r.DB.Exec("UPDATE categories SET name=$1 WHERE id=$2", category.Name, category.ID)
 	if err != nil {
 		return err

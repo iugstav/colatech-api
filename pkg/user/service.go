@@ -11,25 +11,26 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/iugstav/colatech-api/internal/cloud"
+	"github.com/iugstav/colatech-api/internal/entities"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type IUserService interface {
-	Create(data *CreateUserServiceRequest) error
-	Authenticate(data *AuthenticateUserServiceRequest) (*AuthenticateUserResponse, error)
-	GetById(id string) (*GetUserByIdResponse, error)
-	UploadIMage(data *UploadProfileImageRequest) error
+	Create(data *entities.CreateUserServiceRequest) error
+	Authenticate(data *entities.AuthenticateUserServiceRequest) (*entities.AuthenticateUserResponse, error)
+	GetById(id string) (*entities.GetUserByIdResponse, error)
+	UploadIMage(data *entities.UploadProfileImageRequest) error
 }
 
 type UserService struct {
-	UsersRepository IUsersRepository
+	UsersRepository entities.IUsersRepository
 }
 
-func GenerateNewUserService(repository IUsersRepository) *UserService {
+func GenerateNewUserService(repository entities.IUsersRepository) *UserService {
 	return &UserService{UsersRepository: repository}
 }
 
-func (s *UserService) Create(data *CreateUserServiceRequest) error {
+func (s *UserService) Create(data *entities.CreateUserServiceRequest) error {
 	formattedCreationDate, parseErr := time.Parse("2006-01-02 03:04:05", data.CreatedAt)
 	if parseErr != nil {
 		return parseErr
@@ -42,7 +43,7 @@ func (s *UserService) Create(data *CreateUserServiceRequest) error {
 		return errMessage
 	}
 
-	user := User{
+	user := entities.User{
 		ID:        data.ID,
 		UserName:  data.UserName,
 		FirstName: data.FirstName,
@@ -61,7 +62,7 @@ func (s *UserService) Create(data *CreateUserServiceRequest) error {
 	return nil
 }
 
-func (s *UserService) UploadIMage(data *UploadProfileImageRequest) error {
+func (s *UserService) UploadIMage(data *entities.UploadProfileImageRequest) error {
 	defer data.File.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -94,7 +95,7 @@ func (s *UserService) UploadIMage(data *UploadProfileImageRequest) error {
 		os.Getenv("FIREBASE_STORAGE_BUCKET_NAME"),
 		"users%2F"+data.NameToUpload)
 
-	d := &UploadProfileImageToPersistence{
+	d := &entities.UploadProfileImageToPersistence{
 		ID:              data.ID,
 		ProfileImageURL: imageURL,
 	}
@@ -107,7 +108,7 @@ func (s *UserService) UploadIMage(data *UploadProfileImageRequest) error {
 	return nil
 }
 
-func (s *UserService) Authenticate(data *AuthenticateUserServiceRequest) (*AuthenticateUserResponse, error) {
+func (s *UserService) Authenticate(data *entities.AuthenticateUserServiceRequest) (*entities.AuthenticateUserResponse, error) {
 	var role string
 
 	user, err := s.UsersRepository.GetByEmail(data.Email)
@@ -125,7 +126,7 @@ func (s *UserService) Authenticate(data *AuthenticateUserServiceRequest) (*Authe
 		role = "reader"
 	}
 
-	response := &AuthenticateUserResponse{
+	response := &entities.AuthenticateUserResponse{
 		ID:   user.ID,
 		Role: role,
 	}
@@ -133,7 +134,7 @@ func (s *UserService) Authenticate(data *AuthenticateUserServiceRequest) (*Authe
 	return response, nil
 }
 
-func (s *UserService) GetById(id string) (*GetUserByIdResponse, error) {
+func (s *UserService) GetById(id string) (*entities.GetUserByIdResponse, error) {
 	_, err := uuid.Parse(id)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
@@ -146,7 +147,7 @@ func (s *UserService) GetById(id string) (*GetUserByIdResponse, error) {
 		return nil, err
 	}
 
-	user := GetUserByIdResponse{
+	user := entities.GetUserByIdResponse{
 		UserName:  response.UserName,
 		FirstName: response.FirstName,
 		LastName:  response.LastName,

@@ -7,24 +7,25 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/iugstav/colatech-api/internal/entities"
 )
 
 type ICommentService interface {
-	Create(data *CreateCommentServiceRequest) (*Comment, error)
-	GetAllFromAPost(postId string) ([]*GetAllFromAPostServiceResponse, error)
-	UpdateContent(dto *UpdateCommentContentDTO) error
+	Create(data *entities.CreateCommentServiceRequest) (*entities.Comment, error)
+	GetAllFromAPost(postId string) ([]*entities.GetAllFromAPostServiceResponse, error)
+	UpdateContent(dto *entities.Comment) error
 	Delete(id string) error
 }
 
 type CommentService struct {
-	CommentsRepository ICommentsRepository
+	CommentsRepository entities.ICommentsRepository
 }
 
-func GenerateNewCommentService(commentsRepository *CommentsRepository) *CommentService {
+func GenerateNewCommentService(commentsRepository entities.ICommentsRepository) *CommentService {
 	return &CommentService{CommentsRepository: commentsRepository}
 }
 
-func (s *CommentService) Create(data *CreateCommentServiceRequest) (*Comment, error) {
+func (s *CommentService) Create(data *entities.CreateCommentServiceRequest) (*entities.Comment, error) {
 	commentId := uuid.New().String()
 	formattedCommentDate, parseErr := time.Parse("2006-01-02 03:04:05", data.PublishedAt)
 	if parseErr != nil {
@@ -39,7 +40,7 @@ func (s *CommentService) Create(data *CreateCommentServiceRequest) (*Comment, er
 		isParentCommentIdValid = true
 	}
 
-	comment := &Comment{
+	comment := &entities.Comment{
 		ID:       commentId,
 		ReaderId: data.ReaderId,
 		PostId:   data.PostId,
@@ -58,8 +59,8 @@ func (s *CommentService) Create(data *CreateCommentServiceRequest) (*Comment, er
 	return comment, nil
 }
 
-func (s *CommentService) GetAllFromAPost(postId string) ([]*GetAllFromAPostServiceResponse, error) {
-	var comments []*GetAllFromAPostServiceResponse
+func (s *CommentService) GetAllFromAPost(postId string) ([]*entities.GetAllFromAPostServiceResponse, error) {
+	var comments []*entities.GetAllFromAPostServiceResponse
 
 	_, err := uuid.Parse(postId)
 	if err != nil {
@@ -82,13 +83,13 @@ func (s *CommentService) GetAllFromAPost(postId string) ([]*GetAllFromAPostServi
 			parentCommentId = ""
 		}
 
-		dataToAppend := &GetAllFromAPostServiceResponse{
+		dataToAppend := &entities.GetAllFromAPostServiceResponse{
 			ID:              comment.ID,
 			PostId:          comment.PostId,
 			ParentCommentId: parentCommentId,
 			Content:         comment.Content,
 			PublishedAt:     comment.PublishedAt,
-			Reader: ReaderInfoInsideComment{
+			Reader: entities.ReaderInfoInsideComment{
 				ID:        comment.ReaderId,
 				FirstName: comment.ReaderFirstName,
 				LastName:  comment.ReaderLastName,
@@ -101,7 +102,7 @@ func (s *CommentService) GetAllFromAPost(postId string) ([]*GetAllFromAPostServi
 	return comments, nil
 }
 
-func (s *CommentService) UpdateContent(dto *UpdateCommentContentDTO) error {
+func (s *CommentService) UpdateContent(dto *entities.Comment) error {
 	_, err := uuid.Parse(dto.ID)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())
