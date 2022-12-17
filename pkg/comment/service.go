@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -30,13 +31,24 @@ func (s *CommentService) Create(data *CreateCommentServiceRequest) (*Comment, er
 		return nil, parseErr
 	}
 
+	var isParentCommentIdValid bool
+
+	if len(data.ParentCommentId) == 0 {
+		isParentCommentIdValid = false
+	} else {
+		isParentCommentIdValid = true
+	}
+
 	comment := &Comment{
-		ID:              commentId,
-		ReaderId:        data.ReaderId,
-		PostId:          data.PostId,
-		ParentCommentId: data.ParentCommentId,
-		Content:         data.Content,
-		PublishedAt:     formattedCommentDate,
+		ID:       commentId,
+		ReaderId: data.ReaderId,
+		PostId:   data.PostId,
+		ParentCommentId: sql.NullString{
+			String: data.ParentCommentId,
+			Valid:  isParentCommentIdValid,
+		},
+		Content:     data.Content,
+		PublishedAt: formattedCommentDate,
 	}
 
 	if err := s.CommentsRepository.Create(comment); err != nil {
@@ -62,10 +74,18 @@ func (s *CommentService) GetAllFromAPost(postId string) ([]*GetAllFromAPostServi
 	}
 
 	for _, comment := range *response {
+		var parentCommentId string
+
+		if comment.ParentCommentId.Valid {
+			parentCommentId = comment.ParentCommentId.String
+		} else {
+			parentCommentId = ""
+		}
+
 		dataToAppend := &GetAllFromAPostServiceResponse{
 			ID:              comment.ID,
 			PostId:          comment.PostId,
-			ParentCommentId: comment.ParentCommentId,
+			ParentCommentId: parentCommentId,
 			Content:         comment.Content,
 			PublishedAt:     comment.PublishedAt,
 			Reader: ReaderInfoInsideComment{

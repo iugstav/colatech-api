@@ -34,7 +34,7 @@ func (r *CommentsRepository) GetAllFromAPost(postId string) (*[]CommentFromPersi
 
 	err := r.DB.Select(
 		&comments,
-		`SELECT c.id, c.reader_id, c.cost_id, 
+		`SELECT c.id, c.reader_id, c.post_id, 
 		 c.parent_id, c.content, c.published_at, 
 		 r.first_name AS reader_first_name, r.last_name AS reader_last_name, r.image_url FROM post_comments c 
 		 LEFT JOIN readers r ON p.reader_id=r.id
