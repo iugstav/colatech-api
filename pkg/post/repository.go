@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/iugstav/colatech-api/pkg/likes"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -15,7 +16,7 @@ type IPostsRepository interface {
 	GetById(id string) (*GetPostByIdFromRepository, error)
 	UpdateContent(dto *UpdatePostContentDTO) error
 	UploadImage(dto *UploadPostCoverImageInPersistence) error
-	LikePost(data *LikePostInPersistence) error
+	LikePost(data *likes.LikePostInPersistence) error
 	Delete(id string) error
 	Exists(id string) bool
 	BothUserAndPostExists(userId string, postId string) (bool, bool)
@@ -107,7 +108,7 @@ func (r *PostsRepository) UpdateContent(dto *UpdatePostContentDTO) error {
 	return nil
 }
 
-func (r *PostsRepository) LikePost(data *LikePostInPersistence) error {
+func (r *PostsRepository) LikePost(data *likes.LikePostInPersistence) error {
 	query := `INSERT INTO likes(id, user_id, post_id) VALUES(:id, :user_id, :post_id)`
 
 	_, err := r.DB.NamedExec(query, &data)

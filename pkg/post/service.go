@@ -12,6 +12,7 @@ import (
 	"github.com/iugstav/colatech-api/internal/cloud"
 	"github.com/iugstav/colatech-api/pkg/category"
 	"github.com/iugstav/colatech-api/pkg/comment"
+	"github.com/iugstav/colatech-api/pkg/likes"
 	"github.com/pkg/errors"
 )
 
@@ -203,7 +204,7 @@ func (s *PostService) LikePost(dto *LikePostDTO) error {
 
 	likeID := uuid.NewString()
 
-	data := &LikePostInPersistence{
+	data := &likes.LikePostInPersistence{
 		ID:     likeID,
 		UserID: dto.UserID,
 		PostID: dto.PostID,

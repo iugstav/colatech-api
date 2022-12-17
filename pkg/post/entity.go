@@ -97,8 +97,3 @@ type LikePostDTO struct {
 	UserID string `json:"user_id" binding:"required"`
 	PostID string `json:"post_id" binding:"required"`
 }
-type LikePostInPersistence struct {
-	ID     string `db:"id"`
-	UserID string `db:"user_id"`
-	PostID string `db:"post_id"`
-}

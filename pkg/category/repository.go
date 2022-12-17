@@ -1,6 +1,11 @@
 package category
 
-import "github.com/jmoiron/sqlx"
+import (
+	"database/sql"
+	"log"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type ICategoriesRepository interface {
 	Create(category *Category) error
@@ -8,6 +13,7 @@ type ICategoriesRepository interface {
 	GetById(id string) (*Category, error)
 	UpdateName(category *Category) error
 	Delete(id string) error
+	Exists(id string) error
 }
 
 type CategoriesRepository struct {
@@ -67,4 +73,21 @@ func (r *CategoriesRepository) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (r *CategoriesRepository) Exists(id string) bool {
+	var exists bool
+
+	query := `SELECT EXISTS (SELECT id FROM categories WHERE id=$1)`
+
+	err := r.DB.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatalf("Error while checking existence of category: %v", err.Error())
+		}
+	}
+
+	return true
 }

@@ -1,12 +1,18 @@
 package user
 
-import "github.com/jmoiron/sqlx"
+import (
+	"database/sql"
+	"log"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type IUsersRepository interface {
 	Create(user *User) error
 	GetById(id string) (*User, error)
 	GetByEmail(email string) (*User, error)
 	UploadImage(dto *UploadProfileImageToPersistence) error
+	Exists(id string) bool
 }
 
 type UsersRepository struct {
@@ -58,4 +64,23 @@ func (r *UsersRepository) UploadImage(dto *UploadProfileImageToPersistence) erro
 	}
 
 	return nil
+}
+
+func (r *UsersRepository) Exists(id string) bool {
+	var exists bool
+
+	query := `SELECT EXISTS (SELECT id FROM readers where id=$1)`
+
+	err := r.DB.QueryRow(query, id).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			exists = false
+		} else {
+			log.Fatalf("Error while checking existence of user: %v", err.Error())
+		}
+	} else {
+		exists = true
+	}
+
+	return exists
 }
