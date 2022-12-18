@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/iugstav/colatech-api/internal/entities"
+	"github.com/iugstav/colatech-api/internal/validation"
 )
 
 type ICategoryService interface {
@@ -25,6 +26,12 @@ func GenerateNewCategoryService(repository entities.ICategoriesRepository) *Cate
 
 func (s *CategoryService) Create(name string) (*entities.Category, error) {
 	categoryId := uuid.New().String()
+
+	if !validation.IsSanitized(name) {
+		invalidNameError := fmt.Errorf("invalid name format %s", name)
+
+		return nil, invalidNameError
+	}
 
 	category := entities.Category{
 		ID:   categoryId,
