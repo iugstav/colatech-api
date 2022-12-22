@@ -17,6 +17,6 @@ type Comment struct {
 type ICommentsRepository interface {
 	Create(comment *Comment) error
 	GetAllFromAPost(postId string) (*[]CommentFromPersistence, error)
-	UpdateContent(dto *Comment) error
+	UpdateContent(dto *UpdateCommentContentDTO) error
 	Delete(id string) error
 }

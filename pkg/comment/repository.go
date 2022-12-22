@@ -43,7 +43,7 @@ func (r *CommentsRepository) GetAllFromAPost(postId string) (*[]entities.Comment
 	return comments, nil
 }
 
-func (r *CommentsRepository) UpdateContent(dto *entities.Comment) error {
+func (r *CommentsRepository) UpdateContent(dto *entities.UpdateCommentContentDTO) error {
 	_, err := r.DB.Exec("UPDATE post_comments SET content=$1 WHERE id=$2", dto.ID, dto.Content)
 	if err != nil {
 		return err

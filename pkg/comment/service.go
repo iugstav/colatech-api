@@ -102,7 +102,7 @@ func (s *CommentService) GetAllFromAPost(postId string) ([]*entities.GetAllFromA
 	return comments, nil
 }
 
-func (s *CommentService) UpdateContent(dto *entities.Comment) error {
+func (s *CommentService) UpdateContent(dto *entities.UpdateCommentContentDTO) error {
 	_, err := uuid.Parse(dto.ID)
 	if err != nil {
 		errMessage := fmt.Sprintf("Invalid uuid: %v", err.Error())

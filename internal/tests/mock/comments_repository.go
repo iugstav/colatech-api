@@ -54,7 +54,7 @@ func (rm *CommentsRepositoryMock) GetAllFromAPost(postId string) (*[]entities.Co
 	return &comments, nil
 }
 
-func (rm *CommentsRepositoryMock) UpdateContent(dto *entities.Comment) error {
+func (rm *CommentsRepositoryMock) UpdateContent(dto *entities.UpdateCommentContentDTO) error {
 	for _, c := range rm.DB {
 		if c.ID == dto.ID {
 			c.Content = dto.Content

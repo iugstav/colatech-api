@@ -46,3 +46,8 @@ type CreateCommentServiceRequest struct {
 	Content         string
 	PublishedAt     string
 }
+
+type UpdateCommentContentDTO struct {
+	ID      string `json:"id" binding:"required"`
+	Content string `json:"content" binding:"required"`
+}
