@@ -133,12 +133,12 @@ func (s *PostService) GetById(id string) (*entities.GetPostByIdServiceResponse, 
 
 	response, repositoryErr := s.PostsRepository.GetById(id)
 	if repositoryErr != nil {
-		return nil, err
+		return nil, repositoryErr
 	}
 
 	cmt, commentErr := s.CommentsRepository.GetAllFromAPost(id)
 	if commentErr != nil {
-		return nil, err
+		return nil, commentErr
 	}
 
 	post := &entities.GetPostByIdServiceResponse{
@@ -188,7 +188,7 @@ func (s *PostService) LikePost(dto *entities.LikePostDTO) error {
 		return errors.New(errMessage)
 	}
 
-	postExists, userExists := s.PostsRepository.BothUserAndPostExists(dto.UserID, dto.UserID)
+	postExists, userExists := s.PostsRepository.BothUserAndPostExists(dto.UserID, dto.PostID)
 
 	if !postExists && userExists {
 		errorMsg := errors.New("this id does not refers to any post")
