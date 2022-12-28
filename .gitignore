@@ -14,6 +14,9 @@
 
 *.out
 
+.firebaserc
+firebase.json
+
 vendor/
 
 internal/cloud/*.json
