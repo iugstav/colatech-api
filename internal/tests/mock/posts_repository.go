@@ -54,13 +54,13 @@ func (rm *PostsRepositoryMock) GetAllMinified() ([]*entities.ResumedPost, error)
 }
 
 func (rm *PostsRepositoryMock) GetById(id string) (*entities.GetPostByIdFromRepository, error) {
+	ct, err := rm.CategoriesRepository.GetById(id)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, p := range rm.DB {
 		if p.ID == id {
-			ct, err := rm.CategoriesRepository.GetById(p.CategoryID)
-			if err != nil {
-				return nil, err
-			}
-
 			fromPersistence := entities.GetPostByIdFromRepository{
 				ID:            p.ID,
 				Title:         p.Title,
@@ -82,14 +82,12 @@ func (rm *PostsRepositoryMock) GetById(id string) (*entities.GetPostByIdFromRepo
 }
 
 func (rm *PostsRepositoryMock) UpdateContent(data *entities.UpdatePostContentDTO) error {
-	if rm.Exists(data.ID) {
-		for _, c := range rm.DB {
-			if c.ID == data.ID {
-				c.Content = data.NewContent
-				return nil
-			}
-		}
+	post, err := rm.GetById(data.ID)
+	if err != nil {
+		return err
 	}
+
+	post.Content = data.NewContent
 
 	return nil
 }
