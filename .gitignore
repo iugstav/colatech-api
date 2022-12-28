@@ -15,6 +15,7 @@
 *.out
 
 .firebaserc
+
 firebase.json
 
 vendor/
